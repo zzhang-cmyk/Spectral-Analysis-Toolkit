@@ -1,0 +1,45 @@
+# Spectral_Analysis_Toolkit PCA 主成分分析模块配置
+# 本模块直接读取经 SG 平滑并人工筛选后的全部有效单次扫描光谱进行主成分分析，
+# 不先计算样本平均光谱，不进行 SG 平滑、异常光谱识别、人工筛选和代表性光谱计算，
+# 不做 SNV / MSC / 导数等额外预处理。
+#
+# 数据组织：总文件夹 → 类别文件夹 → 样本文件夹 → 平滑 TXT。
+# 一级文件夹名即类别，二级文件夹名即样本，二级文件夹内所有 TXT 为同一样本的单次扫描。
+# 类别数量、样本数量、扫描次数、名称与波段范围均不固定。
+#
+# 运行时生效，也可通过 run_pca.py 命令行参数覆盖。
+
+input:
+  data_dir: "E:\\data\\Spectral_Analysis_Toolkit\\data\\PCA_Input"  # 总输入文件夹
+  file_glob: "*.txt"              # 样本文件夹内 TXT 匹配规则
+  separator: auto                 # auto / comma / tab / space / semicolon
+  header: auto                    # auto / true / false
+  encoding: auto                  # auto / utf-8 / gb18030 / gbk / latin-1
+  on_missing: warn                # warn / error / drop
+  on_column_error: error          # error / warn
+  wavelength_tolerance: 1e-6      # 全部光谱波长坐标一致性比较容差（nm）
+
+analysis:
+  wavelength_min: 400             # 分析波段下限，null = 完整光谱
+  wavelength_max: 1000            # 分析波段上限，null = 完整光谱
+  n_components: 2                 # 保留/展示的主成分数量；all 或 <=0 = 全部有效主成分
+  centering: mean                 # 中心化方式，第一版仅支持 mean（均值中心化）
+
+plot:
+  figure_dpi: 300                 # PNG 分辨率
+  figsize: [8, 6]                 # 图片尺寸（宽, 高），单位英寸
+  font_size: 11                   # 字体大小
+  grid: false                     # 默认关闭网格线
+  scatter_size: 30                # 得分图散点大小（面积）
+  scatter_alpha: 0.85             # 得分图散点透明度
+  score_pairs:                    # 得分图主成分组合（编号从 1 开始）
+    - [1, 2]
+  score_plot_mode: "sample"       # 得分图输出模式：sample（仅样本级）/ species（仅树种级）/ both（两者都生成）
+  legend_loc: "best"              # 得分图图例位置（best = 自动选择不遮挡散点的位置，始终在图框内）
+  legend_max_ncol: 2              # 图例最大列数
+  loading_x_min: 400              # 载荷图横轴显示下限
+  loading_x_max: 1000             # 载荷图横轴显示上限
+  max_variance_bars: 10           # 方差贡献率图最多显示的主成分数量
+
+output:
+  out_dir: "..\\outputs\\pca"     # 输出根目录（相对 config/ 目录），自动创建时间戳子目录

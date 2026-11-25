@@ -1,0 +1,68 @@
+# Spectral_Analysis_Toolkit V1.0 配置
+# 所有参数均可修改；运行 run.py 时生效，也可用命令行参数覆盖。
+#
+# 数据格式：TXT，Tab 分隔，首行表头为 Wavelength、Intensity。
+# Intensity 为白板校正后的反射率。波长单位 nm。
+# 原始数据完整保留，绝不覆盖、不修改源文件。
+
+input:
+  data_dir: "E:\\data\\Spectral_Analysis_Toolkit\\data\\ATH1010-25矿石反射率\\ATH1010-25矿石反射率\\锡矿"       # 输入 TXT 目录（相对路径以本配置文件所在目录 config/ 为基准，../ 即项目根目录）
+  file_glob: "*.txt"            # 文件匹配规则，可改为 "*.TXT" 或 "sample_*.txt"
+  file_list: []                 # 可选：仅处理指定文件（如 ["1-1.txt","1-2.txt"]），空 = 整个文件夹
+  separator: auto               # auto / comma / tab / space / semicolon
+  header: auto                  # auto / true / false
+  encoding: auto                # auto / utf-8 / gb18030 / gbk / latin-1
+  wavelength_col: auto          # auto / 0 起始列序号 / 表头名
+  reflectance_col: auto         # 同上（自动识别 Wavelength / Intensity 列）
+  on_missing: warn              # warn(丢弃该行并提示) / error / drop
+  on_column_error: error        # error / warn(跳过异常行)
+
+grouping:
+  enabled: true
+  # 必须包含命名分组 sample 与 scan（或 sample_id / scan_id）
+  # 例如 1-1.txt -> 样本1 扫描1；1-10.txt -> 样本1 扫描10
+  pattern: '(?P<sample>\d+)-(?P<scan>\d+)'
+
+# 实际处理范围：控制哪些波长参与 SG 平滑；与绘图范围相互独立。
+processing:
+  wavelength_min: null          # 处理范围起始波长，null = 完整光谱
+  wavelength_max: null          # 处理范围结束波长，null = 完整光谱
+  resample: auto                # auto(非均匀时重采样) / always / never
+  resample_method: linear       # linear / nearest / cubic
+  resample_step: null           # 均匀网格步长，null = 取原始间隔中位数
+
+sg:
+  window_length: 5              # 窗口长度，必须为奇数，且大于 polyorder
+  polyorder: 2                  # 多项式阶数，必须小于 window_length
+  deriv: 0                      # 导数阶数，第一版默认 0
+  mode: interp                  # 边界处理方式，默认 interp
+
+# 绘图显示范围：只控制横轴显示，不影响已完成平滑；默认木材案例 400-1000 nm。
+plot:
+  x_min: 1000                    # 绘图横轴下限，null = 数据最小值
+  x_max: 2500                   # 绘图横轴上限，null = 数据最大值
+  y_min: null                   # 绘图纵轴下限，null = 自动适配
+  y_max: null                   # 绘图纵轴上限，null = 自动适配
+  figure_dpi: 300               # 图片分辨率
+  title: "锡矿光谱反射率"
+  xlabel: "Wavelength (nm)"
+  ylabel: "Reflectance"
+  line_width: 1.5               # 曲线线宽
+  legend_loc: "best"            # 图例位置（best=自动选不遮挡曲线的位置；也可指定 upper left/right 等）
+  grid: false                   # 默认关闭网格线
+  font_size: 11                 # 字体大小
+  legend_labels: {}             # 可选：自定义图例名称，如 {"1-1": "样本1-第一次扫描"}
+
+output:
+  out_dir: "../outputs"         # 输出根目录（相对 config/ 目录），自动创建带时间戳子目录
+  export_smoothed_txt: true     # 每条光谱平滑后 TXT
+  export_excel: true            # 汇总 Excel（原始/平滑/参数）
+  export_png: true              # PNG 曲线图
+  export_record: true           # 处理记录 JSON
+  plots:
+    single_overlay: false       # 单条原始+平滑叠加（原始vs平滑对比，已关闭）
+    multi_curves: true          # 多条曲线叠加（平滑后）
+    sample_scans: false          # 同一样本多次扫描对比（平滑后）
+    sample_comparison: false    # 不同样本之间对比（平滑后均值）
+    before_after: false         # 平滑前后多条对比（已关闭）
+    mean_std: false             # 平均光谱+标准差阴影（预留）

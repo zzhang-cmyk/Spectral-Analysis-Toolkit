@@ -1,0 +1,38 @@
+# Spectral_Analysis_Toolkit 代表性光谱提取模块配置
+# 本模块读取已完成 SG 平滑并剔除异常的光谱文件，按样本文件夹逐波长算术平均，
+# 生成每个样本的代表性光谱数据与曲线图。不进行 SG 平滑，不做任何额外预处理。
+#
+# 数据组织：一个总文件夹 + 多个样本子文件夹。
+# 一级子文件夹名即样本名，子文件夹内所有 TXT 为同一样本的多次扫描。
+# 样本数量、扫描次数、材料名称、波段范围均不固定。
+#
+# 运行时生效，也可通过 run_representative.py 命令行参数覆盖。
+
+input:
+  data_dir: "E:\\data\\Spectral_Analysis_Toolkit\\data\\各树种反射率"  # 总输入文件夹（一级子文件夹即样本）
+  file_glob: "*.txt"              # 样本子文件夹内 TXT 匹配规则
+  separator: auto                 # auto / comma / tab / space / semicolon
+  header: auto                    # auto / true / false
+  encoding: auto                  # auto / utf-8 / gb18030 / gbk / latin-1
+  on_missing: warn                # warn / error / drop
+  on_column_error: error          # error / warn
+  wavelength_tolerance: 1e-6      # 同一样本内波长坐标一致性比较容差（nm）
+
+# 绘图显示范围：只控制横轴/纵轴显示，不影响输出的完整代表性光谱数据。
+plot:
+  x_min: 400                      # 绘图横轴下限，null = 数据最小值
+  x_max: 1000                     # 绘图横轴上限，null = 数据最大值
+  y_min: null                     # 绘图纵轴下限，null = 自动适配
+  y_max: null                     # 绘图纵轴上限，null = 自动适配
+  figure_dpi: 300                 # PNG 分辨率
+  figsize: [8, 5]                 # 图片尺寸（宽, 高），单位英寸
+  title: "各样本光谱对比"
+  xlabel: "Wavelength (nm)"
+  ylabel: "Reflectance"
+  line_width: 1.5                 # 曲线线宽
+  legend_loc: "best"              # 图例位置（best=自动选不遮挡曲线的位置）
+  grid: false                     # 默认关闭网格线
+  font_size: 11                   # 字体大小
+
+output:
+  out_dir: "..\\outputs\\representative"   # 输出根目录（相对 config/ 目录），自动创建带时间戳子目录
